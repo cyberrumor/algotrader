@@ -120,3 +120,29 @@ print(movingstdhishort)
 print()
 print('moving low std dist 50 day:')
 print(movingstdloshort)
+
+
+# here we need to push these values into the AMD panda series
+
+
+# draw the plots
+
+# AMD close prices
+hist['Close'].plot(label='AMD', color='red')
+plt.xlabel('date')
+plt.ylabel('price')
+plt.title('AMD stock data')
+
+# here we need to draw the AMD moving means and std deviations
+# requires moving the data into the series first
+# https://pythonexamples.org/pandas-dataframe-add-column/
+
+# show the legend
+plt.legend()
+
+# show grid
+plt.grid(True)
+
+# this will draw the plot
+plt.show()
+
