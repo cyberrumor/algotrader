@@ -5,7 +5,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 amd = yf.Ticker("AMD")
+
+
 hist = amd.history(period="365d")
+print(type(hist))
+
+# if hist is panda dataframe type, you can use
+# hist.insert(5, "std_high", [21, 22, 23], True)
+
 somenumbers = hist['Close'].values
 
 # square root formula, so we don't need to import math
@@ -122,20 +129,39 @@ print('moving low std dist 50 day:')
 print(movingstdloshort)
 
 
-# here we need to push these values into the AMD panda series
 
+# Need to check whether this inserts correctly
+# here we need to push these values into the AMD panda series
+# hist.insert(5, "Mean_50_day", shortmovingmean, True)
+# hist.insert(6, "Mean_200_day", listmovingmean, True)
+# hist.insert(7, "Std_50_hi", movingstdhishort, True)
+# hist.insert(8, "Std_200_hi", movingstdhi, True)
+# hist.insert(9, "Std_50_lo", movingstdloshort, True)
+# hist.insert(10, "Std_200_lo", movingstdhishort, True)
 
 # draw the plots
-
 # AMD close prices
 hist['Close'].plot(label='AMD', color='red')
 plt.xlabel('date')
 plt.ylabel('price')
 plt.title('AMD stock data')
 
+
+# the below returns 'no numerical data to plot'
 # here we need to draw the AMD moving means and std deviations
 # requires moving the data into the series first
+# hist['Mean_50_day'].plot(label='Mean_50_day', color='blue')
+# hist['Mean_200_day'].plot(label='Mean_200_day', color='purple')
+# hist['Std_50_hi'].plot(label='Std_50_hi', color='green')
+# hist['Std_200_hi'].plot(label='Std_200_hi', color='yellow')
+# hist['Std_50_lo'].plot(label='Std_50_lo', color='orange')
+# hist['Std_200_lo'].plot(label='Std_200_lo', color='cyan')
+
+
 # https://pythonexamples.org/pandas-dataframe-add-column/
+
+
+
 
 # show the legend
 plt.legend()
