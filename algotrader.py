@@ -1,13 +1,13 @@
 #!/usr/bin/python3
 
-# for rounding correctly, this currently truncates instead of rounds
-# from decimal import Decimal
+import yfinance as yf
+import matplotlib.pyplot as plt
+import numpy as np
 
-somenumbers = [54.51, 54.2,  54.59, 55.47, 56.39, 54.65, 55.17, 53.19, 52.74, 51.74, 53.8,  53.63,
- 53.54, 52.73, 52.63, 53.1,  52.97, 56.39, 57.44, 52.83, 53.5,  54.68, 54.46, 54.55,
- 54.04, 54.23, 54.76, 53.99, 52.39, 51.93, 50.1,  50.28, 52.61, 52.58, 52.34, 53.4,
- 52.93, 53.43, 57.26, 55.88, 53.59, 54.72, 55.34, 54.92, 55.04, 57.46, 57.,   61.79,
- 59.57, 69.4]
+amd = yf.Ticker("AMD")
+hist = amd.history(period="200d")
+
+somenumbers = hist['Close'].values
 
 # square root formula, so we don't need to import math
 def sqrt(x):
