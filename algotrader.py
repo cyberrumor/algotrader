@@ -5,8 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 amd = yf.Ticker("AMD")
-hist = amd.history(period="200d")
-
+hist = amd.history(period="365d")
 somenumbers = hist['Close'].values
 
 # square root formula, so we don't need to import math
@@ -89,21 +88,35 @@ def sublist(x, y):
 		i += 1
 	return result
 
-listmovingstd = movingstd(somenumbers, 10)
+listmovingstd = movingstd(somenumbers, 200)
 movingstdhi = addlist(somenumbers, listmovingstd)
 movingstdlo = sublist(somenumbers, listmovingstd)
-listmovingmean = movingmean(somenumbers, 10)
+listmovingmean = movingmean(somenumbers, 200)
+shortmovingmean = movingmean(somenumbers, 50)
+fiftydaymovingstd = movingstd(somenumbers, 50)
+movingstdhishort = addlist(somenumbers, fiftydaymovingstd)
+movingstdloshort = sublist(somenumbers, fiftydaymovingstd)
+
+
 
 print()
 print('amd:')
 print(somenumbers)
 print()
-print('mean:')
+print('moving mean 200 day:')
 print(listmovingmean)
 print()
-print('high std dist:')
+print('moving high std dist 200 day:')
 print(movingstdhi)
 print()
-print('low std dist:')
+print('moving low std dist 200 day:')
 print(movingstdlo)
 print()
+print('moving mean 50 day:')
+print(shortmovingmean)
+print()
+print('moving high std dist 50 day:')
+print(movingstdhishort)
+print()
+print('moving low std dist 50 day:')
+print(movingstdloshort)
