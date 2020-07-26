@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
-# get some data, preferably from somewhere free like yahoo finance
-# the below is the 50 day closing prices of AMD taken on July 25th
+# for rounding correctly, this currently truncates instead of rounds
+# from decimal import Decimal
 
 somenumbers = [54.51, 54.2,  54.59, 55.47, 56.39, 54.65, 55.17, 53.19, 52.74, 51.74, 53.8,  53.63,
  53.54, 52.73, 52.63, 53.1,  52.97, 56.39, 57.44, 52.83, 53.5,  54.68, 54.46, 54.55,
@@ -46,7 +46,7 @@ def movingmean(x, y):
 		i += 1
 	for i in x[0 + e:y + e]:
 		while e + y < len(x):
-			result.append(mean(x[0 + e:y + e]))
+			result.append('{:0.2f}'.format(mean(x[0 + e:y + e])))
 			e += 1
 	return result
 
@@ -71,7 +71,7 @@ def addlist(x, y):
 	i = 0
 	while i < len(x):
 		if type(x[i]) and type(y[i]) != str:
-			result.append(x[i] + y[i])
+			result.append('{:0.2f}'.format(x[i] + y[i]))
 		else:
 			result.append("nan")
 		i += 1
@@ -83,24 +83,27 @@ def sublist(x, y):
 	i = 0
 	while i < len(x):
 		if type(x[i]) and type(y[i]) != str:
-			result.append(x[i] - y[i])
+			result.append('{:0.2f}'.format(x[i] - y[i]))
 		else:
 			result.append("nan")
 		i += 1
 	return result
 
 listmovingstd = movingstd(somenumbers, 10)
-movingstdhigh = addlist(somenumbers, listmovingstd)
-movingstdlow = sublist(somenumbers, listmovingstd)
+movingstdhi = addlist(somenumbers, listmovingstd)
+movingstdlo = sublist(somenumbers, listmovingstd)
 listmovingmean = movingmean(somenumbers, 10)
 
-
-print("Moving 10 day std high:")
-print(movingstdhigh)
 print()
-print("Moving 10 day std low:")
-print(movingstdlow)
+print('amd:')
+print(somenumbers)
 print()
-print("Moving 10 day mean:")
+print('mean:')
 print(listmovingmean)
+print()
+print('high std dist:')
+print(movingstdhi)
+print()
+print('low std dist:')
+print(movingstdlo)
 print()
