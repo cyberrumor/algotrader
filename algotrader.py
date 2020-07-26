@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import yfinance as yf
 
 # get some data, preferably from somewhere free like yahoo finance
 # the below is the 50 day closing prices of AMD taken on July 25th
@@ -8,24 +9,29 @@ somenumbers = [54.51, 54.2,  54.59, 55.47, 56.39, 54.65, 55.17, 53.19, 52.74, 51
  52.93, 53.43, 57.26, 55.88, 53.59, 54.72, 55.34, 54.92, 55.04, 57.46, 57.,   61.79,
  59.57, 69.4]
 
+amd = yf.Ticker("AMD")
+amdhist = amd.history(period="200d")
+
+
+somenumbers[1 + i:x + i]
 
 
 
-# square root formula
+# square root formula, so we don't need to import math
 def sqrt(x):
 	if x < 0:
 		return
 	else:
 		return x ** 0.5
 
-# mean formula
+# mean formula, so we don't need to import numpy
 def mean(x):
 	u = 0
 	for i in x:
 		u += i
 	return u / len(x)
 
-# standard deviation formula
+# standard deviation formula, so we don't have to import numpy
 def std(x):
 	u = 0
 	n = 0
@@ -43,6 +49,18 @@ standard_deviation = std(somenumbers)
 buy = average - standard_deviation
 sell = average + standard_deviation
 
+
+def movingstd(x, y):
+	e = 0
+	result = []
+	for i in x[0 + e:y + e]:
+		while e + y < len(x):
+			result[y + e] = std(x[0 + e:y + e])
+			e++
+	print(result)
+	return result
+
+
 print()
 print("data set:")
 print(somenumbers)
@@ -59,3 +77,8 @@ print()
 print("sell above:")
 print(sell)
 print()
+
+listmovingstd = movingstd(somenumbers, 10)
+print("listmovingstd: ")
+print(movingstd)
+
