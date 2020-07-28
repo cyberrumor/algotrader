@@ -52,6 +52,33 @@ def movingmean(x, y):
 			e += 1
 	return result
 
+# follower stop loss, sell on cross from above
+def followerstoploss(x, y):
+	e = 0
+	i = 0
+	result = []
+	while i < y:
+		result.append(0)
+		i += 1
+
+	for i in x[0 + e:y + e]:
+		while e + y < len(x):
+			print('max(result):')
+			print(max(result))
+			print()
+			print('std(x[0 + e:y + e]:')
+			print(std(x[0 + e:y + e]))
+			print()
+			if (sublist(x[0 + e:y + e], std(x[0 + e:y + e])) > max(result)):
+				result.append(sublist(x[0 + e:y + e], std(x[0 + e:y + e])))
+			else:
+				result.append(max(result))
+			e += 1
+	print('result:')
+	print(result)
+	print()
+	return result
+
 # moving standard deviation, x is the list, y is the number of data points at a time
 def movingstd(x, y):
 	e = 0
@@ -105,6 +132,10 @@ hist['bollingerhigh'].plot(label='bollingerhigh', color='green')
 bollingerlow = pandas.Series(sublist(movingmeanshort, twostandarddeviation))
 hist.insert(loc=0, column='bollingerlow', value=bollingerlow.values)
 hist['bollingerlow'].plot(label='bollingerlow', color='green')
+
+stoploss = pandas.Series(followerstoploss(somenumbers, 20))
+hist.insert(loc=0, column='stoploss', value=stoploss.values)
+hist['stoploss'].plot(label='stoploss', color='blue')
 
 hist['Close'].plot(label='AMD', color='black')
 
