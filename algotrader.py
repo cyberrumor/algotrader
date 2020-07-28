@@ -6,7 +6,7 @@ import numpy as np
 import pandas
 
 amd = yf.Ticker("AMD")
-hist = amd.history(period="365d")
+hist = amd.history(period="730d")
 print(type(hist))
 somenumbers = hist['Close'].values
 
@@ -96,7 +96,7 @@ def sublist(x, y):
 movingstdbaselong = movingstd(somenumbers, 200)
 print(movingstdbaselong)
 
-movingstdbaseshort = movingstd(somenumbers, 50)
+movingstdbaseshort = movingstd(somenumbers, 20)
 print(movingstdbaseshort)
 
 movingstdlonghi = pandas.Series(addlist(somenumbers, movingstdbaselong))
@@ -114,7 +114,7 @@ print(movingstdshortlo.values)
 movingmeanlong = pandas.Series(movingmean(somenumbers, 200))
 print(movingmeanlong.values)
 
-movingmeanshort = pandas.Series(movingmean(somenumbers, 50))
+movingmeanshort = pandas.Series(movingmean(somenumbers, 20))
 print(movingmeanshort.values)
 
 
