@@ -3,16 +3,11 @@
 import yfinance as yf
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas
 
 amd = yf.Ticker("AMD")
-
-
 hist = amd.history(period="365d")
 print(type(hist))
-
-# if hist is panda dataframe type, you can use
-# hist.insert(5, "std_high", [21, 22, 23], True)
-
 somenumbers = hist['Close'].values
 
 # square root formula, so we don't need to import math
@@ -48,11 +43,12 @@ def movingmean(x, y):
 	i = 0
 	result = []
 	while i < y:
-		result.append("nan")
+		result.append(0)
 		i += 1
 	for i in x[0 + e:y + e]:
 		while e + y < len(x):
-			result.append('{:0.2f}'.format(mean(x[0 + e:y + e])))
+			# result.append('{:0.2f}'.format(mean(x[0 + e:y + e])))
+			result.append(mean(x[0 + e:y + e]))
 			e += 1
 	return result
 
@@ -62,7 +58,7 @@ def movingstd(x, y):
 	i = 0
 	result = []
 	while i < y:
-		result.append("nan")
+		result.append(0)
 		i += 1
 
 	for i in x[0 + e:y + e]:
@@ -77,9 +73,10 @@ def addlist(x, y):
 	i = 0
 	while i < len(x):
 		if type(x[i]) and type(y[i]) != str:
-			result.append('{:0.2f}'.format(x[i] + y[i]))
+			# result.append('{:0.2f}'.format(x[i] + y[i]))
+			result.append(x[i] + y[i])
 		else:
-			result.append("nan")
+			result.append(0)
 		i += 1
 	return result
 
@@ -89,78 +86,66 @@ def sublist(x, y):
 	i = 0
 	while i < len(x):
 		if type(x[i]) and type(y[i]) != str:
-			result.append('{:0.2f}'.format(x[i] - y[i]))
+			# result.append('{:0.2f}'.format(x[i] - y[i]))
+			result.append(x[i] - y[i])
 		else:
-			result.append("nan")
+			result.append(0)
 		i += 1
 	return result
 
-listmovingstd = movingstd(somenumbers, 200)
-movingstdhi = addlist(somenumbers, listmovingstd)
-movingstdlo = sublist(somenumbers, listmovingstd)
-listmovingmean = movingmean(somenumbers, 200)
-shortmovingmean = movingmean(somenumbers, 50)
-fiftydaymovingstd = movingstd(somenumbers, 50)
-movingstdhishort = addlist(somenumbers, fiftydaymovingstd)
-movingstdloshort = sublist(somenumbers, fiftydaymovingstd)
+movingstdbaselong = movingstd(somenumbers, 200)
+print(movingstdbaselong)
+
+movingstdbaseshort = movingstd(somenumbers, 50)
+print(movingstdbaseshort)
+
+movingstdlonghi = pandas.Series(addlist(somenumbers, movingstdbaselong))
+print(movingstdlonghi.values)
+
+movingstdlonglo = pandas.Series(sublist(somenumbers, movingstdbaselong))
+print(movingstdlonglo.values)
+
+movingstdshorthi = pandas.Series(addlist(somenumbers, movingstdbaseshort))
+print(movingstdshorthi.values)
+
+movingstdshortlo = pandas.Series(sublist(somenumbers, movingstdbaseshort))
+print(movingstdshortlo.values)
+
+movingmeanlong = pandas.Series(movingmean(somenumbers, 200))
+print(movingmeanlong.values)
+
+movingmeanshort = pandas.Series(movingmean(somenumbers, 50))
+print(movingmeanshort.values)
 
 
 
-print()
-print('amd:')
-print(somenumbers)
-print()
-print('moving mean 200 day:')
-print(listmovingmean)
-print()
-print('moving high std dist 200 day:')
-print(movingstdhi)
-print()
-print('moving low std dist 200 day:')
-print(movingstdlo)
-print()
-print('moving mean 50 day:')
-print(shortmovingmean)
-print()
-print('moving high std dist 50 day:')
-print(movingstdhishort)
-print()
-print('moving low std dist 50 day:')
-print(movingstdloshort)
+hist.insert(loc=0, column='STDLongHi', value=movingstdlonghi.values)
+hist.insert(loc=0, column='STDLongLo', value=movingstdlonglo.values)
+hist.insert(loc=0, column='STDShortHi', value=movingstdshorthi.values)
+hist.insert(loc=0, column='STDShortLo', value=movingstdshortlo.values)
+hist.insert(loc=0, column='ShortMean', value=movingmeanshort.values)
+hist.insert(loc=0, column='LongMean', value=movingmeanlong.values)
 
 
 
-# Need to check whether this inserts correctly
-# here we need to push these values into the AMD panda series
-# hist.insert(5, "Mean_50_day", shortmovingmean, True)
-# hist.insert(6, "Mean_200_day", listmovingmean, True)
-# hist.insert(7, "Std_50_hi", movingstdhishort, True)
-# hist.insert(8, "Std_200_hi", movingstdhi, True)
-# hist.insert(9, "Std_50_lo", movingstdloshort, True)
-# hist.insert(10, "Std_200_lo", movingstdhishort, True)
+
 
 # draw the plots
 # AMD close prices
-hist['Close'].plot(label='AMD', color='red')
+hist['Close'].plot(label='AMD', color='black')
 plt.xlabel('date')
 plt.ylabel('price')
 plt.title('AMD stock data')
 
-
-# the below returns 'no numerical data to plot'
-# here we need to draw the AMD moving means and std deviations
-# requires moving the data into the series first
-# hist['Mean_50_day'].plot(label='Mean_50_day', color='blue')
-# hist['Mean_200_day'].plot(label='Mean_200_day', color='purple')
-# hist['Std_50_hi'].plot(label='Std_50_hi', color='green')
-# hist['Std_200_hi'].plot(label='Std_200_hi', color='yellow')
-# hist['Std_50_lo'].plot(label='Std_50_lo', color='orange')
-# hist['Std_200_lo'].plot(label='Std_200_lo', color='cyan')
+hist['STDLongHi'].plot(label='STDLongHi', color='red')
+hist['STDLongLo'].plot(label='STDLongLo', color='red')
+hist['STDShortHi'].plot(label='STDShortHi', color='green')
+hist['STDShortLo'].plot(label='STDShortLo', color='green')
+hist['ShortMean'].plot(label='ShortMean', color='blue')
+hist['LongMean'].plot(label='LongMean', color='blue')
 
 
-# https://pythonexamples.org/pandas-dataframe-add-column/
-
-
+print(hist)
 
 
 # show the legend
