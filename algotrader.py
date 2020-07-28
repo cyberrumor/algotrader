@@ -93,60 +93,25 @@ def sublist(x, y):
 		i += 1
 	return result
 
-movingstdbaselong = movingstd(somenumbers, 200)
-print(movingstdbaselong)
-
 movingstdbaseshort = movingstd(somenumbers, 20)
-print(movingstdbaseshort)
+twostandarddeviation = addlist(movingstdbaseshort, movingstdbaseshort)
+movingmeanshort = movingmean(somenumbers, 20)
 
-movingstdlonghi = pandas.Series(addlist(somenumbers, movingstdbaselong))
-print(movingstdlonghi.values)
+# set up some charts
+bollingerhigh = pandas.Series(addlist(movingmeanshort, twostandarddeviation))
+hist.insert(loc=0, column='bollingerhigh', value=bollingerhigh.values)
+hist['bollingerhigh'].plot(label='bollingerhigh', color='green')
 
-movingstdlonglo = pandas.Series(sublist(somenumbers, movingstdbaselong))
-print(movingstdlonglo.values)
+bollingerlow = pandas.Series(sublist(movingmeanshort, twostandarddeviation))
+hist.insert(loc=0, column='bollingerlow', value=bollingerlow.values)
+hist['bollingerlow'].plot(label='bollingerlow', color='green')
 
-movingstdshorthi = pandas.Series(addlist(somenumbers, movingstdbaseshort))
-print(movingstdshorthi.values)
-
-movingstdshortlo = pandas.Series(sublist(somenumbers, movingstdbaseshort))
-print(movingstdshortlo.values)
-
-movingmeanlong = pandas.Series(movingmean(somenumbers, 200))
-print(movingmeanlong.values)
-
-movingmeanshort = pandas.Series(movingmean(somenumbers, 20))
-print(movingmeanshort.values)
-
-
-
-hist.insert(loc=0, column='STDLongHi', value=movingstdlonghi.values)
-hist.insert(loc=0, column='STDLongLo', value=movingstdlonglo.values)
-hist.insert(loc=0, column='STDShortHi', value=movingstdshorthi.values)
-hist.insert(loc=0, column='STDShortLo', value=movingstdshortlo.values)
-hist.insert(loc=0, column='ShortMean', value=movingmeanshort.values)
-hist.insert(loc=0, column='LongMean', value=movingmeanlong.values)
-
-
-
-
-
-# draw the plots
-# AMD close prices
 hist['Close'].plot(label='AMD', color='black')
+
+# set up some labels
 plt.xlabel('date')
 plt.ylabel('price')
 plt.title('AMD stock data')
-
-hist['STDLongHi'].plot(label='STDLongHi', color='red')
-hist['STDLongLo'].plot(label='STDLongLo', color='red')
-hist['STDShortHi'].plot(label='STDShortHi', color='green')
-hist['STDShortLo'].plot(label='STDShortLo', color='green')
-hist['ShortMean'].plot(label='ShortMean', color='blue')
-hist['LongMean'].plot(label='LongMean', color='blue')
-
-
-print(hist)
-
 
 # show the legend
 plt.legend()
