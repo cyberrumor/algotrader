@@ -5,9 +5,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas
 
+# Set size for averages
+scope = 20
+
+
 amd = yf.Ticker("AMD")
 hist = amd.history(period="730d")
-print(type(hist))
 somenumbers = hist['Close'].values
 
 # square root formula, so we don't need to import math
@@ -19,10 +22,10 @@ def sqrt(x):
 
 # mean formula, so we don't need to import numpy
 def mean(x):
-	u = 0
+	e = 0
 	for i in x:
-		u += i
-	return u / len(x)
+		e += i
+	return e / len(x)
 
 # standard deviation formula, so we don't have to import numpy
 def std(x):
@@ -39,36 +42,35 @@ def std(x):
 
 # moving mean, x is the list, y is the number of data points at a time
 def movingmean(x, y):
-	e = 0
-	i = 0
 	result = []
+	i = 0
+	e = 0
 	while i < y:
 		result.append(0)
 		i += 1
 	for i in x[0 + e:y + e]:
 		while e + y < len(x):
-			# result.append('{:0.2f}'.format(mean(x[0 + e:y + e])))
 			result.append(mean(x[0 + e:y + e]))
 			e += 1
 	return result
 
-
+# return the biggest value from a list
 def biggest(list):
 	if list == []:
 		return 0
 	if list != []:
 		return max(list)
 
-
-# follower stop loss, sell on cross from above
-def followerstoploss(x, y, risk):
+# followerstoplossA, current price - (standard deviation * risk). Only moves up.
+# consider using https://en.wikipedia.org/wiki/Parabolic_SAR instead
+def followerstoplossA(x, y, risk):
 	result = []
 	i = 0
-	z = movingstd(x, y)
+	e = movingstd(x, y)
 	while i < len(x):
-		if type(x[i]) and type(z[i]) != str:
-			if x[i] - (z[i] * risk) > biggest(result):
-				result.append(x[i] - (z[i] * risk))
+		if type(x[i]) and type(e[i]) != str:
+			if x[i] - (e[i] * risk) > biggest(result):
+				result.append(x[i] - (e[i] * risk))
 			else:
 				result.append(biggest(result))
 		else:
@@ -78,9 +80,9 @@ def followerstoploss(x, y, risk):
 
 # moving standard deviation, x is the list, y is the number of data points at a time
 def movingstd(x, y):
-	e = 0
-	i = 0
 	result = []
+	i = 0
+	e = 0
 	while i < y:
 		result.append(0)
 		i += 1
@@ -115,9 +117,9 @@ def sublist(x, y):
 		i += 1
 	return result
 
-movingstdbaseshort = movingstd(somenumbers, 20)
+movingstdbaseshort = movingstd(somenumbers, scope)
 twostandarddeviation = addlist(movingstdbaseshort, movingstdbaseshort)
-movingmeanshort = movingmean(somenumbers, 20)
+movingmeanshort = movingmean(somenumbers, scope)
 
 # set up some charts
 bollingerhigh = pandas.Series(addlist(movingmeanshort, twostandarddeviation))
@@ -128,9 +130,9 @@ bollingerlow = pandas.Series(sublist(movingmeanshort, twostandarddeviation))
 hist.insert(loc=0, column='bollingerlow', value=bollingerlow.values)
 hist['bollingerlow'].plot(label='bollingerlow', color='green')
 
-stoploss = pandas.Series(followerstoploss(somenumbers, 20, 1))
-hist.insert(loc=0, column='stoploss', value=stoploss.values)
-hist['stoploss'].plot(label='stoploss', color='blue')
+# stoploss = pandas.Series(followerstoplossA(somenumbers, 20, 1))
+# hist.insert(loc=0, column='stoploss', value=stoploss.values)
+# hist['stoploss'].plot(label='stoploss', color='blue')
 
 hist['Close'].plot(label='AMD', color='black')
 
