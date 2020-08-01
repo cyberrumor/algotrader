@@ -8,7 +8,6 @@ import pandas
 # Set size for averages
 scope = 20
 
-
 amd = yf.Ticker("AMD")
 hist = amd.history(period="730d")
 somenumbers = hist['Close'].values
@@ -145,9 +144,9 @@ bollingerlow = pandas.Series(sublist(movingmeanshort, twostandarddeviation))
 hist.insert(loc=0, column='bollingerlow', value=bollingerlow.values)
 hist['bollingerlow'].plot(label='bollingerlow', color='green')
 
-# stoploss = pandas.Series(followerstoplossA(somenumbers, 20, 1))
-# hist.insert(loc=0, column='stoploss', value=stoploss.values)
-# hist['stoploss'].plot(label='stoploss', color='blue')
+stoploss = pandas.Series(followerstoplossA(somenumbers, 20, 1))
+hist.insert(loc=0, column='stoploss', value=stoploss.values)
+hist['stoploss'].plot(label='stoploss', color='blue')
 
 sar(somenumbers, 20)
 
