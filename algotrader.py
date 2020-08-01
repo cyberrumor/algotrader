@@ -153,17 +153,18 @@ sar(somenumbers, 20)
 
 hist['Close'].plot(label='AMD', color='black')
 
-# set up some labels
-plt.xlabel('date')
-plt.ylabel('price')
-plt.title('AMD stock data')
 
-# show the legend
-plt.legend()
+if __name__ == "__main__":
+	# set up some labels
+	plt.xlabel('date')
+	plt.ylabel('price')
+	plt.title('AMD stock data')
 
-# show grid
-plt.grid(True)
+	# show the legend
+	plt.legend()
 
-# this will draw the plot
-plt.show()
+	# show grid
+	plt.grid(True)
 
+	# this will draw the plot
+	plt.show()
