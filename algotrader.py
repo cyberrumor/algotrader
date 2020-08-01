@@ -78,6 +78,21 @@ def followerstoplossA(x, y, risk):
 		i += 1
 	return result
 
+def sar(x, y):
+	result = [0]
+	# ep is extreme point, record kept of largest or smallest values
+	ep = 1
+	# maximum value of a should be capped at 0.20
+	a = 0.01
+	for value in x:
+		result.append(result[-1] + a * (ep - result[-1]))
+		if result[-1] >= ep:
+			ep = result[-1]
+			print("ep:")
+			print(ep)
+	return result
+
+
 # moving standard deviation, x is the list, y is the number of data points at a time
 def movingstd(x, y):
 	result = []
@@ -133,6 +148,9 @@ hist['bollingerlow'].plot(label='bollingerlow', color='green')
 # stoploss = pandas.Series(followerstoplossA(somenumbers, 20, 1))
 # hist.insert(loc=0, column='stoploss', value=stoploss.values)
 # hist['stoploss'].plot(label='stoploss', color='blue')
+
+sar(somenumbers, 20)
+
 
 hist['Close'].plot(label='AMD', color='black')
 
