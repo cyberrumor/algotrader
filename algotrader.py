@@ -50,16 +50,13 @@ def biggest(list):
 # followerstoplossA, current price - (standard deviation * risk). Only moves up.
 def followerstoplossA(x, y, risk):
 	result = []
-	i = 0
 	e = movingstd(x, y)
+	i = 0
 	while i < len(x):
-		if type(x[i]) and type(e[i]) != str:
-			if x[i] - (e[i] * risk) > biggest(result):
-				result.append(x[i] - (e[i] * risk))
-			else:
-				result.append(biggest(result))
+		if x[i] - (e[i] * risk) > biggest(result):
+			result.append(x[i] - (e[i] * risk))
 		else:
-			result.append(0)
+			result.append(biggest(result))
 		i += 1
 	return result
 
@@ -76,21 +73,8 @@ def sar(x, y):
 			ep = result[-1]
 			print("ep:")
 			print(ep)
+	result.pop(0)
 	return result
-
-def addlist(x, y):
-	if len(x) != len(y):
-		return [NaN]
-	else:
-		return [x[i] + y[i] for i in range(0, len(x))]
-
-
-# subtract list, can retain nan
-def sublist(x, y):
-	if len(x) != len(y):
-		return [NaN]
-	else:
-		return [x[i] - y[i] for i in range(0, len(x))]
 
 movingstdbaseshort = movingstd(somenumbers, scope)
 twostandarddeviation = addlist(movingstdbaseshort, movingstdbaseshort)
@@ -109,7 +93,12 @@ stoploss = pandas.Series(followerstoplossA(somenumbers, 20, 1))
 hist.insert(loc=0, column='stoploss', value=stoploss.values)
 hist['stoploss'].plot(label='stoploss', color='blue')
 
-sar(somenumbers, 20)
+#stoploss = pandas.Series(sar(somenumbers, 20))
+#print()
+#print(len(stoploss))
+#print()
+#hist.insert(loc=0, column='stoploss', value=stoploss.values)
+#hist['stoploss'].plot(label='stoploss', color='blue')
 
 
 hist['Close'].plot(label='AMD', color='black')
