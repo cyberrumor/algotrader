@@ -16,14 +16,31 @@ somenumbers = hist['Close'].values
 def mean(x):
 	return sum(x) / len(x)
 
-# standard deviation
-def std(x):
-	return (sum([(i - sum(x) / len(x)) ** 2 for i in x]) / len(x)) ** 0.5
-
+# moving mean, x is list, y chunk size
 def movingmean(x, y):
 	return [0] * y + [mean(x[e:y + e]) for e in range(0, len(x) - y)]
 
-# return the biggest value from a list
+# standard deviation, x is list
+def std(x):
+	return (sum([(i - sum(x) / len(x)) ** 2 for i in x]) / len(x)) ** 0.5
+
+# moving standard deviation, x is list, y is chunk size
+def movingstd(x, y):
+	return [0] * y + [std(x[e:y + e]) for e in range(0, len(x) - y)]
+
+# list sums. NaN isn't graphed by matplotlib, this hides graphs using bad sums.
+def addlist(x, y):
+	if len(x) != len(y):
+		return [NaN]
+	else:
+		return [x[i] + y[i] for i in range(0, len(x))]
+def sublist(x, y):
+	if len(x) != len(y):
+		return [NaN]
+	else:
+		return [x[i] - y[i] for i in range(0, len(x))]
+
+# this is necessary because max() does not handle empty lists the way we want.
 def biggest(list):
 	if list == []:
 		return 0
@@ -31,7 +48,6 @@ def biggest(list):
 		return max(list)
 
 # followerstoplossA, current price - (standard deviation * risk). Only moves up.
-# consider using https://en.wikipedia.org/wiki/Parabolic_SAR instead
 def followerstoplossA(x, y, risk):
 	result = []
 	i = 0
@@ -47,6 +63,7 @@ def followerstoplossA(x, y, risk):
 		i += 1
 	return result
 
+# https://en.wikipedia.org/wiki/Parabolic_SAR
 def sar(x, y):
 	result = [0]
 	# ep is extreme point, record kept of largest or smallest values
@@ -60,10 +77,6 @@ def sar(x, y):
 			print("ep:")
 			print(ep)
 	return result
-
-# moving standard deviation, x is list, y is number of data points at a time.
-def movingstd(x, y):
-	return [0] * y + [std(x[e:y + e]) for e in range(0, len(x) - y)]
 
 def addlist(x, y):
 	if len(x) != len(y):
