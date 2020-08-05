@@ -12,46 +12,16 @@ amd = yf.Ticker("AMD")
 hist = amd.history(period="730d")
 somenumbers = hist['Close'].values
 
-# square root formula, so we don't need to import math
-def sqrt(x):
-	if x < 0:
-		return
-	else:
-		return x ** 0.5
-
 # mean formula, so we don't need to import numpy
 def mean(x):
-	e = 0
-	for i in x:
-		e += i
-	return e / len(x)
+	return sum(x) / len(x)
 
-# standard deviation formula, so we don't have to import numpy
+# standard deviation
 def std(x):
-	u = 0
-	n = 0
-	z = 0
-	for i in x:
-		u += i
-	u = u / len(x)
-	for i in x:
-		i = (i - u) ** 2
-		z += i
-	return sqrt(z / len(x))
+	return (sum([(i - sum(x) / len(x)) ** 2 for i in x]) / len(x)) ** 0.5
 
-# moving mean, x is the list, y is the number of data points at a time
 def movingmean(x, y):
-	result = []
-	i = 0
-	e = 0
-	while i < y:
-		result.append(0)
-		i += 1
-	for i in x[0 + e:y + e]:
-		while e + y < len(x):
-			result.append(mean(x[0 + e:y + e]))
-			e += 1
-	return result
+	return [0] * y + [mean(x[e:y + e]) for e in range(0, len(x) - y)]
 
 # return the biggest value from a list
 def biggest(list):
@@ -91,21 +61,9 @@ def sar(x, y):
 			print(ep)
 	return result
 
-
-# moving standard deviation, x is the list, y is the number of data points at a time
+# moving standard deviation, x is list, y is number of data points at a time.
 def movingstd(x, y):
-	result = []
-	i = 0
-	e = 0
-	while i < y:
-		result.append(0)
-		i += 1
-
-	for i in x[0 + e:y + e]:
-		while e + y < len(x):
-			result.append(std(x[0 + e:y + e]))
-			e += 1
-	return result
+	return [0] * y + [std(x[e:y + e]) for e in range(0, len(x) - y)]
 
 # add list, can handle retain nan
 def addlist(x, y):
