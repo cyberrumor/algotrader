@@ -65,29 +65,19 @@ def sar(x, y):
 def movingstd(x, y):
 	return [0] * y + [std(x[e:y + e]) for e in range(0, len(x) - y)]
 
-# add list, can handle retain nan
 def addlist(x, y):
-	result = []
-	i = 0
-	while i < len(x):
-		if type(x[i]) and type(y[i]) != str:
-			result.append(x[i] + y[i])
-		else:
-			result.append(0)
-		i += 1
-	return result
+	if len(x) != len(y):
+		return [NaN]
+	else:
+		return [x[i] + y[i] for i in range(0, len(x))]
+
 
 # subtract list, can retain nan
 def sublist(x, y):
-	result = []
-	i = 0
-	while i < len(x):
-		if type(x[i]) and type(y[i]) != str:
-			result.append(x[i] - y[i])
-		else:
-			result.append(0)
-		i += 1
-	return result
+	if len(x) != len(y):
+		return [NaN]
+	else:
+		return [x[i] - y[i] for i in range(0, len(x))]
 
 movingstdbaseshort = movingstd(somenumbers, scope)
 twostandarddeviation = addlist(movingstdbaseshort, movingstdbaseshort)
