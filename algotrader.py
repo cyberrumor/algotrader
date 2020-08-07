@@ -1,22 +1,25 @@
 #!/usr/bin/python3
 
+# the data source
 import yfinance as yf
+# the plotter
 import matplotlib.pyplot as plt
-import numpy as np
+# convert list to plottable array
 import pandas
 
 # Set size for averages
 scope = 20
 
+# pick a stock
 amd = yf.Ticker("AMD")
 hist = amd.history(period="730d")
 somenumbers = hist['Close'].values
 
-# mean formula, so we don't need to import numpy
+# mean formula, x is list
 def mean(x):
 	return sum(x) / len(x)
 
-# moving mean, x is list, y chunk size
+# moving mean y is chunk size
 def movingmean(x, y):
 	return [0] * y + [mean(x[e:y + e]) for e in range(0, len(x) - y)]
 
@@ -24,11 +27,11 @@ def movingmean(x, y):
 def std(x):
 	return (sum([(i - sum(x) / len(x)) ** 2 for i in x]) / len(x)) ** 0.5
 
-# moving standard deviation, x is list, y is chunk size
+# moving standard deviation, y is chunk size
 def movingstd(x, y):
 	return [0] * y + [std(x[e:y + e]) for e in range(0, len(x) - y)]
 
-# list sums. NaN isn't graphed by matplotlib, this hides graphs using bad sums.
+# list sums. NaN isn't graphed by matplotlib, this hides graphs using bad sums. expects lists.
 def addlist(x, y):
 	if len(x) != len(y):
 		return [NaN]
@@ -41,11 +44,11 @@ def sublist(x, y):
 		return [x[i] - y[i] for i in range(0, len(x))]
 
 # this is necessary because max() does not handle empty lists the way we want.
-def biggest(list):
-	if list == []:
+def biggest(x):
+	if x == []:
 		return 0
-	if list != []:
-		return max(list)
+	if x != []:
+		return max(x)
 
 # followerstoplossA, current price - (standard deviation * risk). Only moves up.
 def followerstoplossA(x, y, risk):
@@ -76,33 +79,27 @@ def sar(x, y):
 	result.pop(0)
 	return result
 
+# crunch
 movingstdbaseshort = movingstd(somenumbers, scope)
 twostandarddeviation = addlist(movingstdbaseshort, movingstdbaseshort)
 movingmeanshort = movingmean(somenumbers, scope)
 
-# set up some charts
+# bollinger high
 bollingerhigh = pandas.Series(addlist(movingmeanshort, twostandarddeviation))
 hist.insert(loc=0, column='bollingerhigh', value=bollingerhigh.values)
 hist['bollingerhigh'].plot(label='bollingerhigh', color='green')
-
+# bollinger low
 bollingerlow = pandas.Series(sublist(movingmeanshort, twostandarddeviation))
 hist.insert(loc=0, column='bollingerlow', value=bollingerlow.values)
 hist['bollingerlow'].plot(label='bollingerlow', color='green')
 
-stoploss = pandas.Series(followerstoplossA(somenumbers, 20, 1))
+# stoploss
+stoploss = pandas.Series(followerstoplossA(somenumbers, scope, 1))
 hist.insert(loc=0, column='stoploss', value=stoploss.values)
 hist['stoploss'].plot(label='stoploss', color='blue')
 
-#stoploss = pandas.Series(sar(somenumbers, 20))
-#print()
-#print(len(stoploss))
-#print()
-#hist.insert(loc=0, column='stoploss', value=stoploss.values)
-#hist['stoploss'].plot(label='stoploss', color='blue')
-
-
+# base price
 hist['Close'].plot(label='AMD', color='black')
-
 
 if __name__ == "__main__":
 	# set up some labels
