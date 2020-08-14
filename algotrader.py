@@ -31,6 +31,70 @@ def std(x):
 def movingstd(x, y):
 	return [0] * y + [std(x[e:y + e]) for e in range(0, len(x) - y)]
 
+# close values psar
+def psar(x, iaf = 0.02, maxaf = 0.2):
+	psar = list(x)
+	psarbull = [None] * len(x)
+	psarbear = [None] * len(x)
+	bull = True
+	af = iaf
+	ep = hp = lp = x[0]
+
+	for i in range(2, len(x)):
+		if bull:
+			psar[i] = psar[i - 1] + af * (hp - psar[i - 1])
+		else:
+			psar[i] = psar[i - 1] + af * (lp - psar[i - 1])
+		reverse = False
+
+		# this if/else triggers the actual stop and reverse, resetting af on the way
+		if bull:
+			if x[i] < psar[i]:
+				bull = False
+				reverse = True
+				psar[i] = hp
+				lp = x[i]
+				af = iaf
+		else:
+			if x[i] > psar[i]:
+				bull = True
+				reverse = True
+				psar[i] = lp
+				hp = x[i]
+				af = iaf
+
+		# do this if we didn't just switch directions above
+		if not reverse:
+			if bull:
+				# if we have a new highest high point, increase ratio
+				if x[i] > hp:
+					hp = x[i]
+					af = min(af + iaf, maxaf)
+				# set psar to lowest value between today and yesterday
+				if x[i - 1] < psar[i]:
+					psar[i] = x[i - 1]
+
+				if x[i - 2] < psar[i]:
+					psar[i] = x[i - 2]
+			else:
+				# if we have a new lowest low, increase ratio
+				if x[i] < lp:
+					lp = x[i]
+					af = min(af + iaf, maxaf)
+				# set psar to highest value between today and yesterday
+				if x[i - 1] > psar[i]:
+					psar[i] = x[i - 1]
+				if x[i - 2] > psar[i]:
+					psar[i] = x[i - 2]
+
+
+		if bull:
+			psarbull[i] = psar[i]
+		else:
+			psarbear[i] = psar[i]
+
+	return {"psar":psar, "psarbear":psarbear, "psarbull":psarbull}
+
 # list sums. NaN isn't graphed by matplotlib, this hides graphs using bad sums. expects lists.
 def addlist(x, y):
 	if len(x) != len(y):
@@ -51,7 +115,7 @@ def biggest(x):
 		return max(x)
 
 # followerstoplossA, current price - (standard deviation * risk). Only moves up.
-def followerstoplossA(x, y, risk):
+def resistanceA(x, y, risk):
 	result = []
 	e = movingstd(x, y)
 	i = 0
@@ -63,22 +127,6 @@ def followerstoplossA(x, y, risk):
 		i += 1
 	return result
 
-# https://en.wikipedia.org/wiki/Parabolic_SAR
-def sar(x, y):
-	result = [0]
-	# ep is extreme point, record kept of largest or smallest values
-	ep = 1
-	# maximum value of a should be capped at 0.20
-	a = 0.01
-	for value in x:
-		result.append(result[-1] + a * (ep - result[-1]))
-		if result[-1] >= ep:
-			ep = result[-1]
-			print("ep:")
-			print(ep)
-	result.pop(0)
-	return result
-
 # crunch
 movingstdbaseshort = movingstd(somenumbers, scope)
 twostandarddeviation = addlist(movingstdbaseshort, movingstdbaseshort)
@@ -87,21 +135,37 @@ movingmeanshort = movingmean(somenumbers, scope)
 # bollinger high
 bollingerhigh = pandas.Series(addlist(movingmeanshort, twostandarddeviation))
 hist.insert(loc=0, column='bollingerhigh', value=bollingerhigh.values)
-hist['bollingerhigh'].plot(label='bollingerhigh', color='green')
+hist['bollingerhigh'].plot(label='bollingerhigh', color='gray')
 # bollinger low
 bollingerlow = pandas.Series(sublist(movingmeanshort, twostandarddeviation))
 hist.insert(loc=0, column='bollingerlow', value=bollingerlow.values)
-hist['bollingerlow'].plot(label='bollingerlow', color='green')
+hist['bollingerlow'].plot(label='bollingerlow', color='gray')
 
-# stoploss
-stoploss = pandas.Series(followerstoplossA(somenumbers, scope, 1))
-hist.insert(loc=0, column='stoploss', value=stoploss.values)
-hist['stoploss'].plot(label='stoploss', color='blue')
+# resistance level
+# resistance = pandas.Series(resistanceA(somenumbers, scope, 1))
+# hist.insert(loc=0, column='resistance', value=resistance.values)
+# hist['resistance'].plot(label='resistance', color='blue')
+
+# parabolic stop and reverse
+sar = psar(somenumbers)
+
+# psarsar = pandas.Series(sar['psar'])
+# hist.insert(loc=0, column='psar', value=psarsar.values)
+# hist['psar'].plot(label='psar', color='blue')
+
+psarbull = pandas.Series(sar['psarbull'])
+hist.insert(loc=0, column='psarbull', value=psarbull.values)
+hist['psarbull'].plot(label='psarbull', color='red')
+
+psarbear = pandas.Series(sar['psarbear'])
+hist.insert(loc=0, column='psarbear', value=psarbear.values)
+hist['psarbear'].plot(label='psarbear', color='pink')
 
 # base price
 hist['Close'].plot(label='AMD', color='black')
 
 if __name__ == "__main__":
+
 	# set up some labels
 	plt.xlabel('date')
 	plt.ylabel('price')
