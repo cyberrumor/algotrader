@@ -4,11 +4,15 @@ Pulls target stock data from Yahoo finance, plots bollingerbands and a following
 
 <img src="/screenshot.jpg">
 
-Much of the formulas could have been implimented via a module like numpy, but I chose to write them out manually as this is mostly to help me practice.
+Many of the formulas could have been implimented via a module like numpy, but I chose to write them out manually as this is mostly to help me practice.
+
+# Implimented features
+
+- Following stop loss based on parabolic SAR
+- Bollinger bands
 
 # Planned features
 
-- Alternate following stop loss based on parabolic SAR.
 - Kalman filtering of various signals.
 - Given more than one stock, a recommendation on which to purchase.
 - Auto diversification.
