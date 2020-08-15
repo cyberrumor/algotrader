@@ -127,44 +127,44 @@ def resistanceA(x, y, risk):
 		i += 1
 	return result
 
-# crunch
-movingstdbaseshort = movingstd(somenumbers, scope)
-twostandarddeviation = addlist(movingstdbaseshort, movingstdbaseshort)
-movingmeanshort = movingmean(somenumbers, scope)
-
-# bollinger high
-bollingerhigh = pandas.Series(addlist(movingmeanshort, twostandarddeviation))
-hist.insert(loc=0, column='bollingerhigh', value=bollingerhigh.values)
-hist['bollingerhigh'].plot(label='bollingerhigh', color='gray')
-# bollinger low
-bollingerlow = pandas.Series(sublist(movingmeanshort, twostandarddeviation))
-hist.insert(loc=0, column='bollingerlow', value=bollingerlow.values)
-hist['bollingerlow'].plot(label='bollingerlow', color='gray')
-
-# resistance level
-# resistance = pandas.Series(resistanceA(somenumbers, scope, 1))
-# hist.insert(loc=0, column='resistance', value=resistance.values)
-# hist['resistance'].plot(label='resistance', color='blue')
-
-# parabolic stop and reverse
-sar = psar(somenumbers)
-
-# psarsar = pandas.Series(sar['psar'])
-# hist.insert(loc=0, column='psar', value=psarsar.values)
-# hist['psar'].plot(label='psar', color='blue')
-
-psarbull = pandas.Series(sar['psarbull'])
-hist.insert(loc=0, column='psarbull', value=psarbull.values)
-hist['psarbull'].plot(label='psarbull', color='red')
-
-psarbear = pandas.Series(sar['psarbear'])
-hist.insert(loc=0, column='psarbear', value=psarbear.values)
-hist['psarbear'].plot(label='psarbear', color='pink')
-
-# base price
-hist['Close'].plot(label='AMD', color='black')
-
 if __name__ == "__main__":
+
+	# crunch
+	movingstdbaseshort = movingstd(somenumbers, scope)
+	twostandarddeviation = addlist(movingstdbaseshort, movingstdbaseshort)
+	movingmeanshort = movingmean(somenumbers, scope)
+
+	# bollinger high
+	bollingerhigh = pandas.Series(addlist(movingmeanshort, twostandarddeviation))
+	hist.insert(loc=0, column='bollingerhigh', value=bollingerhigh.values)
+	hist['bollingerhigh'].plot(label='bollingerhigh', color='gray')
+	# bollinger low
+	bollingerlow = pandas.Series(sublist(movingmeanshort, twostandarddeviation))
+	hist.insert(loc=0, column='bollingerlow', value=bollingerlow.values)
+	hist['bollingerlow'].plot(label='bollingerlow', color='gray')
+
+	# resistance level
+	# resistance = pandas.Series(resistanceA(somenumbers, scope, 1))
+	# hist.insert(loc=0, column='resistance', value=resistance.values)
+	# hist['resistance'].plot(label='resistance', color='blue')
+
+	# parabolic stop and reverse
+	sar = psar(somenumbers)
+
+	# psarsar = pandas.Series(sar['psar'])
+	# hist.insert(loc=0, column='psar', value=psarsar.values)
+	# hist['psar'].plot(label='psar', color='blue')
+
+	psarbull = pandas.Series(sar['psarbull'])
+	hist.insert(loc=0, column='psarbull', value=psarbull.values)
+	hist['psarbull'].plot(label='psarbull', color='red')
+
+	psarbear = pandas.Series(sar['psarbear'])
+	hist.insert(loc=0, column='psarbear', value=psarbear.values)
+	hist['psarbear'].plot(label='psarbear', color='pink')
+
+	# base price
+	hist['Close'].plot(label='AMD', color='black')
 
 	# set up some labels
 	plt.xlabel('date')
