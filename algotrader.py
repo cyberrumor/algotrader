@@ -6,6 +6,8 @@ import yfinance as yf
 import matplotlib.pyplot as plt
 # convert list to plottable array
 import pandas
+# for benchmarking
+import time
 
 # Set size for averages
 scope = 20
@@ -127,55 +129,71 @@ def resistanceA(x, y, risk):
 		i += 1
 	return result
 
+# timer supervisor, run any function with "mytimer(): \n\t function()" to time it
+class MyTimer():
+	def __init__(self):
+		self.start = time.time()
+	def __enter__(self):
+		return self
+	def __exit__(self, exc_type, exc_val, exc_tb):
+		end = time.time()
+		runtime = end - self.start
+		msg = 'The function took {time} seconds to complete'
+		print(msg.format(time=runtime))
+
 if __name__ == "__main__":
 
-	# crunch
-	movingstdbaseshort = movingstd(somenumbers, scope)
-	twostandarddeviation = addlist(movingstdbaseshort, movingstdbaseshort)
-	movingmeanshort = movingmean(somenumbers, scope)
+	with MyTimer():
 
-	# bollinger high
-	bollingerhigh = pandas.Series(addlist(movingmeanshort, twostandarddeviation))
-	hist.insert(loc=0, column='bollingerhigh', value=bollingerhigh.values)
-	hist['bollingerhigh'].plot(label='bollingerhigh', color='gray')
-	# bollinger low
-	bollingerlow = pandas.Series(sublist(movingmeanshort, twostandarddeviation))
-	hist.insert(loc=0, column='bollingerlow', value=bollingerlow.values)
-	hist['bollingerlow'].plot(label='bollingerlow', color='gray')
+		# required by twostandardeviation
+		movingstdbaseshort = movingstd(somenumbers, scope)
+		# required by bollinger
+		twostandarddeviation = addlist(movingstdbaseshort, movingstdbaseshort)
+		# required by bollinger
+		movingmeanshort = movingmean(somenumbers, scope)
+		# required by psar{bear, bull, sar}
+		sar = psar(somenumbers)
 
-	# resistance level
-	# resistance = pandas.Series(resistanceA(somenumbers, scope, 1))
-	# hist.insert(loc=0, column='resistance', value=resistance.values)
-	# hist['resistance'].plot(label='resistance', color='blue')
+		# Convert the data into pandas.Series type for plotting.
 
-	# parabolic stop and reverse
-	sar = psar(somenumbers)
+		# bollinger high, requires twostandarddeviation and movingmeanshort
+		bollingerhigh = pandas.Series(addlist(movingmeanshort, twostandarddeviation))
+		# bollinger low, requires twostandarddeviation and movingmeanshort
+		bollingerlow = pandas.Series(sublist(movingmeanshort, twostandarddeviation))
 
-	# psarsar = pandas.Series(sar['psar'])
-	# hist.insert(loc=0, column='psar', value=psarsar.values)
-	# hist['psar'].plot(label='psar', color='blue')
+		# psar, requires sar
+		# psarsar = pandas.Series(sar['psar'])
+		psarbull = pandas.Series(sar['psarbull'])
+		psarbear = pandas.Series(sar['psarbear'])
 
-	psarbull = pandas.Series(sar['psarbull'])
-	hist.insert(loc=0, column='psarbull', value=psarbull.values)
-	hist['psarbull'].plot(label='psarbull', color='red')
+		# resistance level
+		# resistance = pandas.Series(resistanceA(somenumbers, scope, 1))
 
-	psarbear = pandas.Series(sar['psarbear'])
-	hist.insert(loc=0, column='psarbear', value=psarbear.values)
-	hist['psarbear'].plot(label='psarbear', color='pink')
+		# insert the data into the main dataframe.
+		hist['Close'].plot(label='AMD', color='black')
+		hist.insert(loc=0, column='bollingerhigh', value=bollingerhigh.values)
+		hist['bollingerhigh'].plot(label='bollingerhigh', color='gray')
+		hist.insert(loc=0, column='bollingerlow', value=bollingerlow.values)
+		hist['bollingerlow'].plot(label='bollingerlow', color='gray')
+		hist.insert(loc=0, column='psarbull', value=psarbull.values)
+		hist['psarbull'].plot(label='psarbull', color='red')
+		hist.insert(loc=0, column='psarbear', value=psarbear.values)
+		hist['psarbear'].plot(label='psarbear', color='pink')
+		# hist.insert(loc=0, column='psar', value=psarsar.values)
+		# hist['psar'].plot(label='psar', color='blue')
+		# hist.insert(loc=0, column='resistance', value=resistance.values)
+		# hist['resistance'].plot(label='resistance', color='blue')
 
-	# base price
-	hist['Close'].plot(label='AMD', color='black')
+		# set up some labels
+		plt.xlabel('date')
+		plt.ylabel('price')
+		plt.title('AMD stock data')
 
-	# set up some labels
-	plt.xlabel('date')
-	plt.ylabel('price')
-	plt.title('AMD stock data')
+		# show the legend
+		plt.legend()
 
-	# show the legend
-	plt.legend()
+		# show grid
+		plt.grid(True)
 
-	# show grid
-	plt.grid(True)
-
-	# this will draw the plot
+	# this will draw the plot, we don't want to benchmark how long you look at it, esc MyTimer.
 	plt.show()
