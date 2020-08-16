@@ -116,18 +116,15 @@ def biggest(x):
 	if x != []:
 		return max(x)
 
-# followerstoplossA, current price - (standard deviation * risk). Only moves up.
-def resistanceA(x, y, risk):
-	result = []
-	e = movingstd(x, y)
-	i = 0
-	while i < len(x):
-		if x[i] - (e[i] * risk) > biggest(result):
-			result.append(x[i] - (e[i] * risk))
-		else:
-			result.append(biggest(result))
-		i += 1
-	return result
+
+# Hurst exponent
+
+
+# Sharpe filter
+
+
+
+
 
 # timer supervisor, run any function with "mytimer(): \n\t function()" to time it
 class MyTimer():
@@ -166,9 +163,6 @@ if __name__ == "__main__":
 		psarbull = pandas.Series(sar['psarbull'])
 		psarbear = pandas.Series(sar['psarbear'])
 
-		# resistance level
-		# resistance = pandas.Series(resistanceA(somenumbers, scope, 1))
-
 		# insert the data into the main dataframe.
 		hist['Close'].plot(label='AMD', color='black')
 		hist.insert(loc=0, column='bollingerhigh', value=bollingerhigh.values)
@@ -181,8 +175,6 @@ if __name__ == "__main__":
 		hist['psarbear'].plot(label='psarbear', color='pink')
 		# hist.insert(loc=0, column='psar', value=psarsar.values)
 		# hist['psar'].plot(label='psar', color='blue')
-		# hist.insert(loc=0, column='resistance', value=resistance.values)
-		# hist['resistance'].plot(label='resistance', color='blue')
 
 		# set up some labels
 		plt.xlabel('date')
