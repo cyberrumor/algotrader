@@ -13,9 +13,8 @@ Many of the formulas could have been implimented via a module like numpy, but I 
 
 # Planned features
 
-- Kalman filtering of various signals.
-- Given more than one stock, a recommendation on which to purchase.
-- Auto diversification.
-- Automatic buys and sells.
-- Comparison of held positions to market as a whole, to help decide whether to panic sell.
-- Live stats.
+- Dynamic choice of strategy based on Hurst exponent (and possibly other fractal data measurements).
+- Automated choice in stocks based on:
+- - Risk/reward ratio comparison (using Sharpe filter).
+- - Portfolio optimization (using Kalman filtering).
+- - Confidence in patern recognition (using Augmented Dickey Fuller tests).
