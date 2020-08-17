@@ -8,13 +8,18 @@ import matplotlib.pyplot as plt
 import pandas
 # for benchmarking
 import time
+# for args
+import sys
+
+# call this with ./algotrader.py amd
+userinput = sys.argv[-1]
 
 # Set size for averages
 scope = 20
 
 # pick a stock
-amd = yf.Ticker("AMD")
-hist = amd.history(period="730d")
+stock = yf.Ticker(userinput)
+hist = stock.history(period="730d")
 somenumbers = hist['Close'].values
 
 # mean formula, x is list
