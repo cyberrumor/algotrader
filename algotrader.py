@@ -11,16 +11,8 @@ import time
 # for args
 import sys
 
-# call this with ./algotrader.py amd
-userinput = sys.argv[-1]
-
 # Set size for averages
 scope = 20
-
-# pick a stock
-stock = yf.Ticker(userinput)
-hist = stock.history(period="730d")
-somenumbers = hist['Close'].values
 
 # mean formula, x is list
 def mean(x):
@@ -140,57 +132,69 @@ class MyTimer():
 	def __exit__(self, exc_type, exc_val, exc_tb):
 		end = time.time()
 		runtime = end - self.start
-		msg = 'The function took {time} seconds to complete'
+		msg = 'Plotted in {time} second(s)'
 		print(msg.format(time=runtime))
+
+def plotter(i, dataset):
+	# required by twostandardeviation
+	movingstdbaseshort = movingstd(somenumbers, scope)
+	# required by bollinger
+	twostandarddeviation = addlist(movingstdbaseshort, movingstdbaseshort)
+	# required by bollinger
+	movingmeanshort = movingmean(somenumbers, scope)
+	# required by psar{bear, bull, sar}
+	sar = psar(somenumbers)
+
+	# Convert the data into pandas.Series type for plotting.
+	# bollinger high, requires twostandarddeviation and movingmeanshort
+	bollingerhigh = pandas.Series(addlist(movingmeanshort, twostandarddeviation))
+	# bollinger low, requires twostandarddeviation and movingmeanshort
+	bollingerlow = pandas.Series(sublist(movingmeanshort, twostandarddeviation))
+
+	# psar, requires sar
+	# psarsar = pandas.Series(sar['psar'])
+	psarbull = pandas.Series(sar['psarbull'])
+	psarbear = pandas.Series(sar['psarbear'])
+
+	# insert the data into the main dataframe.
+	hist['Close'].plot(label=i, color='black')
+	hist.insert(loc=0, column='bollingerhigh', value=bollingerhigh.values)
+	hist['bollingerhigh'].plot(label='bollingerhigh', color='gray')
+	hist.insert(loc=0, column='bollingerlow', value=bollingerlow.values)
+	hist['bollingerlow'].plot(label='bollingerlow', color='gray')
+	hist.insert(loc=0, column='psarbull', value=psarbull.values)
+	hist['psarbull'].plot(label='psarbull', color='red')
+	hist.insert(loc=0, column='psarbear', value=psarbear.values)
+	hist['psarbear'].plot(label='psarbear', color='pink')
+	# hist.insert(loc=0, column='psar', value=psarsar.values)
+	# hist['psar'].plot(label='psar', color='blue')
 
 if __name__ == "__main__":
 
-	with MyTimer():
+	# show usage and quit if no args were fed
+	if len(sys.argv) == 1:
+		print("Usage: ./algotrader amd aapl msft nvda")
+		exit()
 
-		# required by twostandardeviation
-		movingstdbaseshort = movingstd(somenumbers, scope)
-		# required by bollinger
-		twostandarddeviation = addlist(movingstdbaseshort, movingstdbaseshort)
-		# required by bollinger
-		movingmeanshort = movingmean(somenumbers, scope)
-		# required by psar{bear, bull, sar}
-		sar = psar(somenumbers)
+	# this is for subplotting
+	# fig, (amd, nvda) = plt.subplots(len(sys.argv) - 1, sharex=True)
 
-		# Convert the data into pandas.Series type for plotting.
+	for i in sys.argv[1:]:
+		print('plotting ' + i)
+		stock = yf.Ticker(i)
+		hist = stock.history(period="730d")
+		somenumbers = hist['Close'].values
+		with MyTimer():
+			plotter(i, somenumbers)
 
-		# bollinger high, requires twostandarddeviation and movingmeanshort
-		bollingerhigh = pandas.Series(addlist(movingmeanshort, twostandarddeviation))
-		# bollinger low, requires twostandarddeviation and movingmeanshort
-		bollingerlow = pandas.Series(sublist(movingmeanshort, twostandarddeviation))
+	# set up some labels
+	plt.xlabel('date')
+	plt.ylabel('price')
+	plt.title('stock data')
+	# show the legend
+	plt.legend()
+	# show grid
+	plt.grid(True)
 
-		# psar, requires sar
-		# psarsar = pandas.Series(sar['psar'])
-		psarbull = pandas.Series(sar['psarbull'])
-		psarbear = pandas.Series(sar['psarbear'])
-
-		# insert the data into the main dataframe.
-		hist['Close'].plot(label='AMD', color='black')
-		hist.insert(loc=0, column='bollingerhigh', value=bollingerhigh.values)
-		hist['bollingerhigh'].plot(label='bollingerhigh', color='gray')
-		hist.insert(loc=0, column='bollingerlow', value=bollingerlow.values)
-		hist['bollingerlow'].plot(label='bollingerlow', color='gray')
-		hist.insert(loc=0, column='psarbull', value=psarbull.values)
-		hist['psarbull'].plot(label='psarbull', color='red')
-		hist.insert(loc=0, column='psarbear', value=psarbear.values)
-		hist['psarbear'].plot(label='psarbear', color='pink')
-		# hist.insert(loc=0, column='psar', value=psarsar.values)
-		# hist['psar'].plot(label='psar', color='blue')
-
-		# set up some labels
-		plt.xlabel('date')
-		plt.ylabel('price')
-		plt.title('AMD stock data')
-
-		# show the legend
-		plt.legend()
-
-		# show grid
-		plt.grid(True)
-
-	# this will draw the plot, we don't want to benchmark how long you look at it, esc MyTimer.
+	# draw the plots
 	plt.show()
