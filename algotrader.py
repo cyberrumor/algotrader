@@ -120,16 +120,17 @@ def biggest(x):
 
 # Sharpe filter
 
-# strategies
-def stratmomentum(dataset):
+# do this if it's trending in one direction
+def stratmomentum(dataset, psarbull, psarbear, bollingerhigh, bollingerlow):
+	sell = []
+	buy = []
+	return {"buy":buy, "sell":sell}
 
-	# return buysignals, sellsignals
-	pass
-
-def stratmr(dataset):
-
-	# return buysignals, sellsignals
-	pass
+# do this if there's fractals
+def stratmr(dataset, psarbull, psarbear, bollingerhigh, bollingerlow):
+	sell = []
+	buy = []
+	return {"buy":buy, "sell":sell}
 
 # timer supervisor, run any function with "mytimer(): \n\t function()" to time it
 class MyTimer():
@@ -164,24 +165,26 @@ def plotter(i, dataset):
 	psarbull = pandas.Series(sar['psarbull'])
 	psarbear = pandas.Series(sar['psarbear'])
 
-	# hurst exponent, requires hurst module
+	# hurst exponent, requires hurst module. We should really test this for divergance/convergance
 	H, c, data = compute_Hc(dataset, kind='price', simplified=True)
 	printableH = str(H)
 	print("Hurst of " + i + " = " + printableH)
 
 	# pick strategy based on hurst
 	if H > 0.7:
-		momentum = True
-		meanreversion = False
-		print("recommending momentum strategy")
+		print("recommending momentum strategy.")
+		signals = stratmomentum(dataset, psarbull, psarbear, bollingerhigh, bollingerlow)
+
 	elif H < 0.3:
-		momentum = False
-		meanreversion = True
-		print("recommending mean reversion strategy")
+		print("recommending mean reversion strategy.")
+		signals = stratmr(dataset, psarbull, psarbear, bollingerhigh, bollingerlow)
+
 	else:
-		momentum = False
-		meanreversion = False
 		print("recommending manual trading only, " + i + " is unpredictable.")
+
+	# collect our buy and sell signals
+	# buysignals = pandas.Series(signals['sell'])
+	# sellsignals = pandas.Series(signals['buy'])
 
 	# insert the data into the main dataframe.
 	hist['Close'].plot(label=i, color='black')
@@ -194,8 +197,9 @@ def plotter(i, dataset):
 	hist.insert(loc=0, column='psarbear', value=psarbear.values)
 	hist['psarbear'].plot(label='psarbear', color='pink')
 
-	# hist.insert(loc=0, column='psar', value=psarsar.values)
-	# hist['psar'].plot(label='psar', color='blue')
+	# hist.insert(loc=0, column='sell', value=sell.values)
+	# hist.insert(loc=0, column='buy', value=buy.values)
+
 
 if __name__ == "__main__":
 
