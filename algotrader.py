@@ -10,9 +10,14 @@ import pandas
 import time
 # for args
 import sys
+# for hurst exponent
+from hurst import compute_Hc, random_walk
 
 # Set size for averages
 scope = 20
+
+# amount of history to pull, 100d min required for hurst
+memory = "730d"
 
 # mean formula, x is list
 def mean(x):
@@ -113,15 +118,18 @@ def biggest(x):
 	if x != []:
 		return max(x)
 
-
-# Hurst exponent
-
-
 # Sharpe filter
 
+# strategies
+def stratmomentum(dataset):
 
+	# return buysignals, sellsignals
+	pass
 
+def stratmr(dataset):
 
+	# return buysignals, sellsignals
+	pass
 
 # timer supervisor, run any function with "mytimer(): \n\t function()" to time it
 class MyTimer():
@@ -137,13 +145,13 @@ class MyTimer():
 
 def plotter(i, dataset):
 	# required by twostandardeviation
-	movingstdbaseshort = movingstd(somenumbers, scope)
+	movingstdbaseshort = movingstd(dataset, scope)
 	# required by bollinger
 	twostandarddeviation = addlist(movingstdbaseshort, movingstdbaseshort)
 	# required by bollinger
-	movingmeanshort = movingmean(somenumbers, scope)
+	movingmeanshort = movingmean(dataset, scope)
 	# required by psar{bear, bull, sar}
-	sar = psar(somenumbers)
+	sar = psar(dataset)
 
 	# Convert the data into pandas.Series type for plotting.
 	# bollinger high, requires twostandarddeviation and movingmeanshort
@@ -156,6 +164,25 @@ def plotter(i, dataset):
 	psarbull = pandas.Series(sar['psarbull'])
 	psarbear = pandas.Series(sar['psarbear'])
 
+	# hurst exponent, requires hurst module
+	H, c, data = compute_Hc(dataset, kind='price', simplified=True)
+	printableH = str(H)
+	print("Hurst of " + i + " = " + printableH)
+
+	# pick strategy based on hurst
+	if H > 0.7:
+		momentum = True
+		meanreversion = False
+		print("recommending momentum strategy")
+	elif H < 0.3:
+		momentum = False
+		meanreversion = True
+		print("recommending mean reversion strategy")
+	else:
+		momentum = False
+		meanreversion = False
+		print("recommending manual trading only, " + i + " is unpredictable.")
+
 	# insert the data into the main dataframe.
 	hist['Close'].plot(label=i, color='black')
 	hist.insert(loc=0, column='bollingerhigh', value=bollingerhigh.values)
@@ -166,6 +193,7 @@ def plotter(i, dataset):
 	hist['psarbull'].plot(label='psarbull', color='red')
 	hist.insert(loc=0, column='psarbear', value=psarbear.values)
 	hist['psarbear'].plot(label='psarbear', color='pink')
+
 	# hist.insert(loc=0, column='psar', value=psarsar.values)
 	# hist['psar'].plot(label='psar', color='blue')
 
@@ -182,10 +210,11 @@ if __name__ == "__main__":
 	for i in sys.argv[1:]:
 		print('plotting ' + i)
 		stock = yf.Ticker(i)
-		hist = stock.history(period="730d")
-		somenumbers = hist['Close'].values
+		hist = stock.history(period=memory)
+		closevalues = hist['Close'].values
+
 		with MyTimer():
-			plotter(i, somenumbers)
+			plotter(i, closevalues)
 
 	# set up some labels
 	plt.xlabel('date')
