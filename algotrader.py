@@ -17,7 +17,7 @@ from hurst import compute_Hc, random_walk
 scope = 20
 
 # amount of history to pull, 100d min required for hurst
-memory = "730d"
+memory = "5y"
 
 # mean formula, x is list
 def mean(x):
@@ -130,6 +130,8 @@ def stratmomentum(dataset, psarbull, psarbear, bollingerhigh, bollingerlow):
 def stratmr(dataset, psarbull, psarbear, bollingerhigh, bollingerlow):
 	sell = []
 	buy = []
+	# we should express standard deviation as a percent of the mean
+	# abuse stocks that are more volatile.
 	return {"buy":buy, "sell":sell}
 
 # timer supervisor, run any function with "mytimer(): \n\t function()" to time it
@@ -175,12 +177,12 @@ def plotter(i, dataset):
 		print("recommending momentum strategy.")
 		signals = stratmomentum(dataset, psarbull, psarbear, bollingerhigh, bollingerlow)
 
-	elif H < 0.3:
+	elif H <= 0.7:
 		print("recommending mean reversion strategy.")
 		signals = stratmr(dataset, psarbull, psarbear, bollingerhigh, bollingerlow)
 
 	else:
-		print("recommending manual trading only, " + i + " is unpredictable.")
+		print("Hurst did not get assigned correctly.")
 
 	# collect our buy and sell signals
 	# buysignals = pandas.Series(signals['sell'])
@@ -208,8 +210,13 @@ if __name__ == "__main__":
 		print("Usage: ./algotrader amd aapl msft nvda")
 		exit()
 
-	# this is for subplotting
-	# fig, (amd, nvda) = plt.subplots(len(sys.argv) - 1, sharex=True)
+	# pragmatically choose number of subplots
+	# https://stackoverflow.com/questions/12319796/dynamically-add-create-subplots-in-matplotlib
+
+	#fig = plt.figure()
+	#ax = fig.add_subplot(111)
+
+
 
 	for i in sys.argv[1:]:
 		print('plotting ' + i)
