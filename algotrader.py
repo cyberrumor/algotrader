@@ -17,7 +17,7 @@ from hurst import compute_Hc, random_walk
 scope = 20
 
 # amount of history to pull, 100d min required for hurst
-memory = "5y"
+memory = "3y"
 
 # mean formula, x is list
 def mean(x):
@@ -134,6 +134,15 @@ def stratmr(dataset, psarbull, psarbear, bollingerhigh, bollingerlow):
 	# abuse stocks that are more volatile.
 	return {"buy":buy, "sell":sell}
 
+# do this if there's cyclic relationships
+def stratrelation(dataset, psarbull, psarbear, bollingerhigh, bollingerlow):
+	sell = []
+	buy = []
+	return {"buy":buy, "sell":sell}
+
+
+
+
 # timer supervisor, run any function with "mytimer(): \n\t function()" to time it
 class MyTimer():
 	def __init__(self):
@@ -146,7 +155,7 @@ class MyTimer():
 		msg = 'Plotted in {time} second(s)'
 		print(msg.format(time=runtime))
 
-def plotter(i, dataset):
+def handler(i, dataset):
 	# required by twostandardeviation
 	movingstdbaseshort = movingstd(dataset, scope)
 	# required by bollinger
@@ -167,17 +176,21 @@ def plotter(i, dataset):
 	psarbull = pandas.Series(sar['psarbull'])
 	psarbear = pandas.Series(sar['psarbear'])
 
-	# hurst exponent, requires hurst module. We should really test this for divergance/convergance
+	# hurst exponent, requires hurst module. We should really test this on relationships instead.
 	H, c, data = compute_Hc(dataset, kind='price', simplified=True)
 	printableH = str(H)
 	print("Hurst of " + i + " = " + printableH)
 
 	# pick strategy based on hurst
-	if H > 0.7:
+	if H > 0.8:
 		print("recommending momentum strategy.")
 		signals = stratmomentum(dataset, psarbull, psarbear, bollingerhigh, bollingerlow)
 
-	elif H <= 0.7:
+	elif H <= 0.8 and H >= 0.7:
+		print("recommending relationship strategy.")
+		signals = stratrelation(dataset, psarbull, psarbear, bollingerhigh, bollingerlow)
+
+	elif H < 0.7:
 		print("recommending mean reversion strategy.")
 		signals = stratmr(dataset, psarbull, psarbear, bollingerhigh, bollingerlow)
 
@@ -190,6 +203,7 @@ def plotter(i, dataset):
 
 	# insert the data into the main dataframe.
 	hist['Close'].plot(label=i, color='black')
+
 	hist.insert(loc=0, column='bollingerhigh', value=bollingerhigh.values)
 	hist['bollingerhigh'].plot(label='bollingerhigh', color='gray')
 	hist.insert(loc=0, column='bollingerlow', value=bollingerlow.values)
@@ -202,6 +216,9 @@ def plotter(i, dataset):
 	# hist.insert(loc=0, column='sell', value=sell.values)
 	# hist.insert(loc=0, column='buy', value=buy.values)
 
+	return hist
+
+
 
 if __name__ == "__main__":
 
@@ -212,20 +229,23 @@ if __name__ == "__main__":
 
 	# pragmatically choose number of subplots
 	# https://stackoverflow.com/questions/12319796/dynamically-add-create-subplots-in-matplotlib
+	fig = plt.figure()
 
-	#fig = plt.figure()
-	#ax = fig.add_subplot(111)
-
-
-
+	# add every single subplot to the figure with a for loop
 	for i in sys.argv[1:]:
+
+		n = len(fig.axes)
+		for e in range(n):
+			fig.axes[e].change_geometry(n + 1, 1, e + 1)
+
 		print('plotting ' + i)
 		stock = yf.Ticker(i)
 		hist = stock.history(period=memory)
 		closevalues = hist['Close'].values
 
 		with MyTimer():
-			plotter(i, closevalues)
+			handler(i, closevalues)
+
 
 	# set up some labels
 	plt.xlabel('date')
