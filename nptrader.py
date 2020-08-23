@@ -1,23 +1,28 @@
 #!/usr/bin/python3
 
 import numpy as np
-import yfinance as yf
+import yfinance
+import matplotlib.pyplot as plt
 import sys
 
-scope = 20
-timeframe = "3y"
+shorttime = 20
+longtime = "3y"
 
 
 if __name__ == "__main__":
-	# show usage and quit if no args were fed
 	if len(sys.argv) == 1:
 		print("Usage: ./algotrader amd aapl msft nvda")
 		exit()
 
-	# pragmatically choose number of subplots
-	# https://stackoverflow.com/questions/12319796/dynamically-add-create-subplots-in-matplotlib
-	fig = plt.figure()
+	fig, axes = plt.subplots(len(sys.argv[1:]), 1, figsize=(10, 4))
 
 	for stock in sys.argv[1:]:
-		prices = yf.Ticker(arg).history(period=timeframe)['Close'].values
+		print("plotting " + stock)
+		plt.subplot(len(sys.argv[1:]), 1, sys.argv.index(stock))
+		plt.title(stock)
+		data = yfinance.Ticker(stock).history(period=longtime)['Close']
+		x = data.index
+		y = data.values
+		plt.plot(x, y)
 
+	plt.show()
