@@ -1,23 +1,17 @@
 #!/usr/bin/python3
 
-# the data source
 import yfinance as yf
-# the plotter
 import matplotlib.pyplot as plt
-# convert list to plottable array
 import pandas
-# for benchmarking
 import time
-# for args
 import sys
-# for hurst exponent
 from hurst import compute_Hc, random_walk
 
 # Set size for averages
 scope = 20
 
 # amount of history to pull, 100d min required for hurst
-memory = "3y"
+timeframe = "3y"
 
 # mean formula, x is list
 def mean(x):
@@ -155,7 +149,7 @@ class MyTimer():
 		msg = 'Plotted in {time} second(s)'
 		print(msg.format(time=runtime))
 
-def handler(i, dataset):
+def handler(arg, dataset):
 	# required by twostandardeviation
 	movingstdbaseshort = movingstd(dataset, scope)
 	# required by bollinger
@@ -179,7 +173,7 @@ def handler(i, dataset):
 	# hurst exponent, requires hurst module. We should really test this on relationships instead.
 	H, c, data = compute_Hc(dataset, kind='price', simplified=True)
 	printableH = str(H)
-	print("Hurst of " + i + " = " + printableH)
+	print("Hurst of " + arg + " = " + printableH)
 
 	# pick strategy based on hurst
 	if H > 0.8:
@@ -202,7 +196,7 @@ def handler(i, dataset):
 	# sellsignals = pandas.Series(signals['buy'])
 
 	# insert the data into the main dataframe.
-	hist['Close'].plot(label=i, color='black')
+	hist['Close'].plot(label=arg, color='black')
 
 	hist.insert(loc=0, column='bollingerhigh', value=bollingerhigh.values)
 	hist['bollingerhigh'].plot(label='bollingerhigh', color='gray')
@@ -232,19 +226,19 @@ if __name__ == "__main__":
 	fig = plt.figure()
 
 	# add every single subplot to the figure with a for loop
-	for i in sys.argv[1:]:
+	for arg in sys.argv[1:]:
 
 		n = len(fig.axes)
 		for e in range(n):
 			fig.axes[e].change_geometry(n + 1, 1, e + 1)
 
-		print('plotting ' + i)
-		stock = yf.Ticker(i)
-		hist = stock.history(period=memory)
+		print('plotting ' + arg)
+		stock = yf.Ticker(arg)
+		hist = stock.history(period=timeframe)
 		closevalues = hist['Close'].values
 
 		with MyTimer():
-			handler(i, closevalues)
+			handler(arg, closevalues)
 
 
 	# set up some labels
