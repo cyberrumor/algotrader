@@ -18,11 +18,22 @@ if __name__ == "__main__":
 
 	for stock in sys.argv[1:]:
 		print("plotting " + stock)
-		plt.subplot(len(sys.argv[1:]), 1, sys.argv.index(stock))
+
+
+
+		# select the subplot(columns, rows, index of selected plot)
+
+		if sys.argv.index(stock) > 1:
+			plt.subplot(len(sys.argv[1:]), 1, sys.argv.index(stock), sharex = plt.subplot(len(sys.argv[1:]), 1, sys.argv.index(stock) - 1))
+		else:
+			plt.subplot(len(sys.argv[1:]), 1, sys.argv.index(stock))
+
+
 		plt.title(stock)
 		data = yfinance.Ticker(stock).history(period=longtime)['Close']
 		x = data.index
 		y = data.values
 		plt.plot(x, y)
+
 
 	plt.show()
