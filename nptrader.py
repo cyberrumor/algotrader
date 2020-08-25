@@ -6,10 +6,8 @@ import matplotlib.pyplot as plt
 import sys
 import time
 
-
 shorttime = 20
 longtime = '3y'
-
 
 def movingstd(x, y):
 	return [0] * y + [np.std(x[e:y + e]) for e in range(0, len(x) - y)]
@@ -30,18 +28,19 @@ def sublist(x, y):
 	else:
 		return [x[i] - y[i] for i in range(0, len(x))]
 
-
-def bollinger(x, y):
+def collector(stock, y):
+	x = yfinance.Ticker(stock).history(period=longtime)['Close']
 	std2 = addlist(movingstd(x, y), movingstd(x, y))
 	upline = addlist(movingmean(x, y), std2)
 	dnline = sublist(movingmean(x, y), std2)
-	return {"upline":upline, "dnline":dnline}
+	return {'upline': upline, 'dnline': dnline, 'close': x, 'index': x.index}
 
-def collector():
-	pass
-
-def plotter():
-	pass
+def plotter(plot, data, stock):
+	plot.plot(data['index'], data['close'], label=stock, color='black')
+	plot.plot(data['index'], data['upline'], label='bollinger', color='gray')
+	plot.plot(data['index'], data['dnline'], label='', color='gray')
+	plot.legend()
+	plot.grid(True)
 
 if __name__ == '__main__':
 
@@ -52,38 +51,15 @@ if __name__ == '__main__':
 
 	if len(sys.argv) == 2:
 		stock = sys.argv[-1]
-
-		# create the plot
 		fig = plt.figure()
-
-		# collect the data we want to plot
-		data = yfinance.Ticker(stock).history(period=longtime)['Close']
-		bollingerbands = bollinger(data, shorttime)
-
-		# plot the data
-		plt.plot(data.index, data.values, label=stock, color='black')
-		plt.plot(data.index, bollingerbands["upline"], label='', color='gray')
-		plt.plot(data.index, bollingerbands["dnline"], label='', color='gray')
-
-		plt.grid(True)
-		plt.legend()
+		data = collector(stock, shorttime)
+		plotter(plt, data, stock)
 
 	else:
-		# create the plots
-		fig, axs = plt.subplots(len(sys.argv[1:]), 1, figsize=(10,4), sharex='col')
+		fig, axs = plt.subplots(len(sys.argv[1:]), 1, figsize=(12,6), sharex='col')
 		for ax, stock in zip(axs, sys.argv[1:]):
-			ax.set_title(stock)
+			data = collector(stock, shorttime)
+			plotter(ax, data, stock)
 
-			# collect the data we want to plot
-			data = yfinance.Ticker(stock).history(period=longtime)['Close']
-			bollingerbands = bollinger(data, shorttime)
 
-			# plot the data
-			ax.plot(data.index, data.values, color='black', label=stock)
-			ax.plot(data.index, bollingerbands["upline"], color='gray', label='')
-			ax.plot(data.index, bollingerbands["dnline"], color='gray', label='')
-			ax.legend()
-			ax.grid(True)
-
-	# draw plot
 	plt.show()
