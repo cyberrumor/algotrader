@@ -25,17 +25,12 @@ def collector(stock, z):
 	y = yfinance.Ticker(stock).history(period=longtime)['Close']
 	std2 = addlist(movingstd(y, z), movingstd(y, z))
 	mean = movingmean(y, z)
-	upline = addlist(mean, std2)
-	dnline = sublist(mean, std2)
+	bollingerhigh = addlist(mean, std2)
+	bollingerlow = sublist(mean, std2)
 	psardata = psar.getpsar(y)
-
-	H, c, data = compute_Hc(y, kind='price', simplified=True)
-	printableH = str(H)
-	print('Hurst of ' + stock + ' = ' + printableH)
-
 	return {stock: y,
-		'upline': upline,
-		'dnline': dnline,
+		'bollingerhigh': bollingerhigh,
+		'bollingerlow': bollingerlow,
 		'psarbear': psardata['psarbear'],
 		'psarbull': psardata['psarbull']
 		}
