@@ -4,10 +4,13 @@ import yfinance
 import matplotlib.pyplot as plt
 from hurst import compute_Hc, random_walk
 import sys
+import strategies
 import psar
 
+# starting funds = alpha
+alpha = 500
 shorttime = 20
-longtime = '3y'
+longtime = '1y'
 
 def movingstd(x, y):
 	return [0] * y + [np.std(x[e:y + e]) for e in range(0, len(x) - y)]
@@ -35,12 +38,74 @@ def collector(stock, z):
 		'psarbull': psardata['psarbull']
 		}
 
-def plotter(plotobject, data, stock):
+
+def print_stats(strategy, price):
+	if strategy['holding']:
+		print('liquid capital:', strategy['capital'])
+		print('all assets:', strategy['capital'] + price)
+	else:
+		print('liquid capital:', strategy['capital'])
+		print('all assets:', strategy['capital'])
+
+def signals(stock, data):
+	# current positions should go here and get fed to strategies.
+	prices = data[stock]
+
+	# mean reversion
+	strat_mr = strategies.mean_reversion(stock, data, alpha)
+	print()
+	print('Mean Reversion on', stock + ':')
+	print_stats(strat_mr, prices[-1])
+
+	# momentum
+	strat_mo = strategies.momentum(stock, data, alpha)
+	print()
+	print('Momentum on', stock + ':')
+	print_stats(strat_mo, prices[-1])
+
+	# buy and hold
+	first_buy = 0
+	for i in strat_mr['buy']:
+		if i != None:
+			first_buy = i
+			break
+	hodl = alpha - first_buy + prices[-1]
+	print()
+	print('Buy and Hold on', stock + ':')
+	print('all assets:', hodl)
+
+	# pick the most profitable strategy
+
+	print('strat_mr["capital"]:', strat_mr['capital'])
+	print('strat_mo["capital"]:', strat_mo['capital'])
+
+	if strat_mr['capital'] < strat_mo['capital']:
+		signals = {'buy': strat_mr['buy'], 'sell': strat_mr['sell']}
+
+	elif strat_mr['capital'] > strat_mo['capital']:
+		signals = {'buy': strat_mo['buy'], 'sell': strat_mo['sell']}
+
+	else:
+		print('there was an issue picking a strategy.')
+		exit()
+
+	# for debugging specific strategies
+	# signals = {'buy': strat_mo['buy'], 'sell': strat_mo['sell']}
+	return signals
+
+def plotter(plotobject, data, stock, exchanges):
 	fig.set_tight_layout(True)
 	x = data[stock].index
 	colors = ['red', 'grey', 'grey', 'black', 'black']
+
+	# price, indicators
 	for y, c in zip(data, colors):
-		plotobject.plot(x, data[y], label=str(y), color=c)
+		plotobject.plot(x, data[y], label = str(y), color = c)
+
+	# buys and sells
+	plotobject.scatter(x, exchanges['buy'], c = 'g', s = 100, marker = '^', label = 'buy')
+	plotobject.scatter(x, exchanges['sell'], c = 'b', s = 100, marker = 'v', label = 'sell')
+
 	plotobject.legend()
 	plotobject.grid(True)
 
@@ -48,15 +113,20 @@ if __name__ == '__main__':
 	if len(sys.argv) == 1:
 		print('Usage: ./algotrader.py amd aapl msft nvda')
 		exit()
+
+	print('Starting with:', alpha)
+
 	if len(sys.argv) == 2:
 		stock = sys.argv[-1]
 		fig = plt.figure()
 		data = collector(stock, shorttime)
-		plotter(plt, data, stock)
+		exchanges = signals(stock, data)
+		plotter(plt, data, stock, exchanges)
 	else:
 		fig, axs = plt.subplots(len(sys.argv[1:]), 1, figsize=(12,6), sharex='col')
 		for ax, stock in zip(axs, sys.argv[1:]):
 			data = collector(stock, shorttime)
-			plotter(ax, data, stock)
+			exchanges = signals(stock, data)
+			plotter(ax, data, stock, exchanges)
 
 	plt.show()
