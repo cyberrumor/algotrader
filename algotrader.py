@@ -8,7 +8,7 @@ import strategies
 import psar
 
 # starting funds = alpha
-alpha = 50
+alpha = 200
 shorttime = 20
 longtime = '1y'
 
@@ -35,7 +35,8 @@ def collector(stock, z):
 		'bollingerhigh': bollingerhigh,
 		'bollingerlow': bollingerlow,
 		'psarbear': psardata['psarbear'],
-		'psarbull': psardata['psarbull']
+		'psarbull': psardata['psarbull'],
+		'sma': mean
 		}
 
 
@@ -88,7 +89,7 @@ def signals(stock, data):
 def plotter(plotobject, data, stock, exchanges):
 	fig.set_tight_layout(True)
 	x = data[stock].index
-	colors = ['red', 'grey', 'grey', 'black', 'black']
+	colors = ['red', 'grey', 'grey', 'black', 'black', 'orange']
 
 	# price, indicators
 	for y, c in zip(data, colors):

@@ -12,30 +12,38 @@ def mean_reversion(stock, data, alpha):
 	for price in prices:
 		# define all sell signal conditions.
 		if holding:
+			# only one security at a time
 			buy.append(None)
-			if price > data['bollingerhigh'][day]:
-				# don't sell if it's lower than purchase price
-				if price < last_buy:
-					sell.append(None)
+			# if all sell conditions are met, sell.
+			if  all([
+				price > last_buy,
+				price > data['bollingerhigh'][day]
+			]):
+				sell.append(price)
+				capital += price
+				holding = False
+				last_buy = 0
 
-				# profitable sale
-				else:
-					sell.append(price)
-					capital += price
-					holding = False
-			# hold
+			# everything else is a hold
 			else:
 				sell.append(None)
 
 		# define all buy signal conditions and check affordability.
 		else:
+			# can't sell what we don't have
 			sell.append(None)
-			if price < data['bollingerlow'][day] and price < capital:
+
+			# detect sale and trigger buy
+			if all([
+				price < data['bollingerlow'][day],
+				price < capital
+			]):
 				buy.append(price)
 				last_buy = price
 				capital -= price
 				holding = True
-			# hold
+
+			# wait for better discount
 			else:
 				buy.append(None)
 		day += 1
@@ -54,12 +62,21 @@ def momentum(stock, data, alpha):
 	for price in prices:
 		# define all sell signal conditions.
 		if holding:
+			# only one security at a time
 			buy.append(None)
-			if data['psarbear'][day]:
+
+			# sell if all criteria are met
+			if all([
+				data['psarbear'][day],
+				price > last_buy
+			]):
+				# profitable sell
 				sell.append(price)
 				capital += price
 				holding = False
-			# hold
+				last_buy = 0
+
+			# everything else is a hold
 			else:
 				sell.append(None)
 
@@ -67,18 +84,19 @@ def momentum(stock, data, alpha):
 		else:
 			# can't sell what we don't have
 			sell.append(None)
-
-			# detect bull run
-			if data['psarbull'][day] and price < capital:
+			# find buy signal and check affordability.
+			if all([
+				data['psarbull'][day],
+				price < capital
+			]):
 				buy.append(price)
 				last_buy = price
 				capital -= price
 				holding = True
-			# hold
+
+			# wait for a better discount
 			else:
 				buy.append(None)
-
 		day += 1
-
 	return {'capital': capital, 'buy': buy, 'sell': sell, 'holding': holding}
 
