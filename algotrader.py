@@ -8,7 +8,7 @@ import strategies
 import psar
 
 # starting funds = alpha
-alpha = 500
+alpha = 50
 shorttime = 20
 longtime = '1y'
 
@@ -71,25 +71,17 @@ def signals(stock, data):
 			break
 	hodl = alpha - first_buy + prices[-1]
 	print()
-	print('Buy and Hold on', stock + ':')
-	print('all assets:', hodl)
-
-	# pick the most profitable strategy
-
-	print('strat_mr["capital"]:', strat_mr['capital'])
-	print('strat_mo["capital"]:', strat_mo['capital'])
-
-	if strat_mr['capital'] < strat_mo['capital']:
+	if strat_mr['capital'] >= strat_mo['capital']:
 		signals = {'buy': strat_mr['buy'], 'sell': strat_mr['sell']}
+		if hodl >= strat_mr['capital']:
+			print('recommending buy and hold:', hodl)
 
-	elif strat_mr['capital'] > strat_mo['capital']:
+
+	elif strat_mo['capital'] > strat_mr['capital']:
 		signals = {'buy': strat_mo['buy'], 'sell': strat_mo['sell']}
-
-	else:
-		print('there was an issue picking a strategy.')
-		exit()
-
-	# for debugging specific strategies
+		if hodl >= strat_mo['capital']:
+			print('recommending buy and hold:', hodl)
+	# test momentum
 	# signals = {'buy': strat_mo['buy'], 'sell': strat_mo['sell']}
 	return signals
 
